@@ -7,9 +7,10 @@ using System.Threading;
 public class InstantiateTree : MonoBehaviour
 {
     [SerializeField] private GameObject[] trees;
+    [SerializeField] private float SpawnRange = 20;
     private List<LSystemTree> lsystemTrees;
     private LSystem ls;
-    private int N = 4;
+    private int N = 5;
     private EvalInfo evalInfo;
     private bool[] updateRules;
 
@@ -44,9 +45,10 @@ public class InstantiateTree : MonoBehaviour
                     continue;
                 }
                 for (int i = 0; i < trees.Length; i++) {
-                    float x = Random.Range(-20f, 20f);
-                    float z = Random.Range(-20f, 20f);
+                    float x = Random.Range(-SpawnRange, SpawnRange);
+                    float z = Random.Range(-SpawnRange, SpawnRange);
                     var to = Instantiate(trees[i], new Vector3(x, 0, z), Quaternion.identity, transform);
+                    Destroy(to, 10f * Random.Range(0.5f, 2.0f));
                     evalInfo = ls.EvaluationInfo;
                     if (evalInfo != null) {
                         updateRules[i] = true;
@@ -57,7 +59,7 @@ public class InstantiateTree : MonoBehaviour
             } catch(System.NullReferenceException e) {
                 Debug.LogWarning("Error occured: (spawn trees)" + e);
             }
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -77,10 +79,10 @@ public class InstantiateTree : MonoBehaviour
                 for (int i = 0; i < 4; i++) {
                     rule += ls.Rule.UsingRuleElements[rnd.Next(elementsCount - 1)];
                 }
-                Debug.Log(rule);
+                if (evalInfo.Height <= 150) rule += "F-F";
+                if (evalInfo.SpreadDegree <= 100) rule += "[-F[+F]]";
                 ls.Rule.TableF[randomIndex] = rule;
-            }
-            if (evalInfo.BranchNum <= 500) {
+            } else if (evalInfo.BranchNum <= 500) {
                 var randomIndex = rnd.Next(tableFCount - 1);
                 string rule = "F";
                 for (int i = 0; i < 4; i++) {
