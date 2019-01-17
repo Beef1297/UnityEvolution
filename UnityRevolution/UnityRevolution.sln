@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio for Mac
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityRevolution", "Unity.Recorder.csproj", "{A2BA3B26-2ECE-844B-D395-87C09E8C8006}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityRevolution", "Unity.Recorder.Samples.csproj", "{AC1DFFE9-FA3A-A99C-7D0C-5A6F19E47465}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityRevolution", "Assembly-CSharp.csproj", "{4BD40A95-2A0F-BC0E-75DC-0954B048C600}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnityRevolution", "Unity.Recorder.Editor.csproj", "{3FF25D7B-D63B-A531-BECA-72272C9DB2B6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2BA3B26-2ECE-844B-D395-87C09E8C8006}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2BA3B26-2ECE-844B-D395-87C09E8C8006}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2BA3B26-2ECE-844B-D395-87C09E8C8006}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2BA3B26-2ECE-844B-D395-87C09E8C8006}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC1DFFE9-FA3A-A99C-7D0C-5A6F19E47465}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC1DFFE9-FA3A-A99C-7D0C-5A6F19E47465}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC1DFFE9-FA3A-A99C-7D0C-5A6F19E47465}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC1DFFE9-FA3A-A99C-7D0C-5A6F19E47465}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BD40A95-2A0F-BC0E-75DC-0954B048C600}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BD40A95-2A0F-BC0E-75DC-0954B048C600}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BD40A95-2A0F-BC0E-75DC-0954B048C600}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BD40A95-2A0F-BC0E-75DC-0954B048C600}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FF25D7B-D63B-A531-BECA-72272C9DB2B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FF25D7B-D63B-A531-BECA-72272C9DB2B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FF25D7B-D63B-A531-BECA-72272C9DB2B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FF25D7B-D63B-A531-BECA-72272C9DB2B6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
