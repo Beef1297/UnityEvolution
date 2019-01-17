@@ -12,7 +12,7 @@ namespace Evolution
     };
 
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-    [ExecuteInEditMode]
+    //[ExecuteInEditMode]
     public abstract class ProceduralModelingBase : MonoBehaviour
     {
 
@@ -44,11 +44,27 @@ namespace Evolution
 
         protected virtual void Start()
         {
-            Rebuild();
+            Debug.Log("this is start of procedural modeling base");
+            StartCoroutine("Rebuild");
         }
 
-        public void Rebuild()
+        protected bool needsUpdate = false;
+
+        protected virtual void Update() {
+            if (needsUpdate) {
+                this.needsUpdate = false;
+                ExecuteRebuild();
+            }
+        }
+
+        [ContextMenu("Rebuild")]
+        protected void ExecuteRebuild() {
+            StartCoroutine("Rebuild");
+        }
+        IEnumerator Rebuild()
         {
+            yield return null;
+            Debug.Log("this is rebuild");
             if (Filter.sharedMesh != null)
             {
                 if (Application.isPlaying)

@@ -9,12 +9,14 @@ namespace Evolution {
 
 	public class LSystemTree : ProceduralModelingBase {
 
-		public TreeData Data { get { return data; } } 
+		public TreeData Data { 
+            get { return data; } 
+        } 
 
 		[SerializeField] TreeData data;
 
 		// 木の枝が分岐する深さ（木の枝が根元から分岐する世代数）
-		[SerializeField, Range(2, 7)] protected int generations = 5;
+		protected int generations = 1;
 
 		// 木の枝の基本となる長さ（根元の枝の長さ）
 		[SerializeField, Range(0.5f, 5f)] protected float length = 1f;
@@ -22,11 +24,16 @@ namespace Evolution {
 		// 木の枝の基本となる太さ（根元の枝の太さ）
 		[SerializeField, Range(0.1f, 2f)] protected float radius = 0.15f;
 
+        int branchNum = 0;
+        float treeHeight = 0f;
+        float spreadDeg = 0f;
+        float branchDetail = 0f;
 		const float PI2 = Mathf.PI * 2f;
 
-		public static Mesh Build(TreeData data, int generations, float length, float radius) {
-			data.Setup();
 
+		public Mesh Build(TreeData data, int generations, float length, float radius) {
+			data.Setup();
+            generations = data.lsystem.MaxLength;
 			var root = new TreeBranch(
 				generations, 
 				length, 
@@ -40,10 +47,71 @@ namespace Evolution {
              生成してみないとワカらないよね．
              */
 
-            string generator = data.lsystem.S_Brackets.Clone().ToString(); // 生成規則を複製 ( あとで更新できるようにするため )
-            for (int i = 0; i < generator.Length; i++) {
+            string generator = data.lsystem.S_Brackets; //
+            Debug.Log("Length is : " + generator.Length + " generator is: " + generator);
+            var parent = root;
+            List<TreeBranch> parents = new List<TreeBranch>(); // 親をスタックしていく
+            List<float> rotations = new List<float>();
+            float rotation_b = 0f;
+            branchNum = 0;
+            for (int i = 1; i < generator.Length; i++) { // root は除く
 
+                if (generator[i] == 'F') {
+
+                    TreeBranch newBranch = new TreeBranch(
+                        parent.Generation - 1, 
+                        generations,
+                        parent.To,
+                        parent.SegmentForChild.Frame.Tangent,
+                        parent.SegmentForChild.Frame.Normal,
+                        parent.SegmentForChild.Frame.Binormal,
+                        parent.Length * data.lengthAttenuation,
+                        parent.ToRadius,
+                        parent.Offset + parent.Length,
+                        rotation_b,
+                        data
+                    );
+                    if (newBranch.FromRadius <= 0.01f) {
+                        continue;
+                    }
+                    if (newBranch.FromRadius <= 0.5f) {
+                        branchDetail++; // TODO: もっと条件を追加する
+                    }
+                    if (Vector3.Distance(root.SegmentForChild.Position, parent.SegmentForChild.Position) > treeHeight) {
+                        // 見たいのは相対的な評価ならこれでも大丈夫
+                        treeHeight = parent.SegmentForChild.Position.y; // (単純な高さじゃなくて，どれぐらい伸びたのかというのが正しい)
+                    }
+                    parent.Children.Add(newBranch);
+                    branchNum++;
+                    parent = newBranch;
+
+                } else if (generator[i] == '+') {
+                    rotation_b = data.lsystem.Angle; // TODO: method 使う
+                    spreadDeg++; // FIXME: 今は回転したら広がっているとしている
+                } else if (generator[i] == '-') {
+                    rotation_b = -data.lsystem.Angle;
+                    spreadDeg++;
+                } else if (generator[i] == '[') {
+                    parents.Add(parent);
+                    rotations.Add(rotation_b);
+                } else if(generator[i] == ']') {
+                    // ']' の時
+                    // parent を pop する
+                    if (parents.Count <= 0) {
+                        Debug.LogError("At Close Bracket, somethin is wrong, maybe it's rule");
+                    }
+                    parent = parents[parents.Count - 1];
+                    parents.RemoveAt(parents.Count - 1);
+                    // 親の回転より回転を元に戻す
+                    // -> 親がもともと曲がっててて，それに対して F はその曲がったまま伸びるため
+                    rotation_b = rotations[rotations.Count - 1];
+                    rotations.RemoveAt(rotations.Count - 1);
+                    
+                }
             }
+            Debug.Log(branchNum);
+
+            data.lsystem.SetEvalInfo(treeHeight, spreadDeg, branchNum, data.radiusAttenuation, branchDetail);
 
 			var vertices = new List<Vector3>();
 			var normals = new List<Vector3>();
@@ -109,18 +177,21 @@ namespace Evolution {
 
 			var mesh = new Mesh();
 			mesh.vertices = vertices.ToArray();
+            Debug.Log("vertices's count: " + vertices.Count);
 			mesh.normals = normals.ToArray();
 			mesh.tangents = tangents.ToArray();
 			mesh.uv = uvs.ToArray();
 			mesh.triangles = triangles.ToArray();
 			mesh.RecalculateBounds();
 
+
 			return mesh;
 		}
 
 		protected override Mesh Build ()
 		{
-			return Build(data, generations, length, radius);
+            var mesh = Build(data, generations, length, radius);
+            return mesh;
 		}
 
 		// 木の枝を再帰的に辿り、全長の長さ（根元から枝先に至るまでの長さ）を返す
@@ -143,6 +214,7 @@ namespace Evolution {
 			action(from);
 		}
 
+
 	}
 
 	[System.Serializable]
@@ -153,11 +225,18 @@ namespace Evolution {
         [Range(-45f, 0f)] public float growthAngleMin = -15f;
         [Range(0f, 45f)] public float growthAngleMax = 15f;
         [Range(1f, 10f)] public float growthAngleScale = 4f;
-		[Range(4, 20)] public int heightSegments = 10, radialSegments = 8;
+		[Range(3, 20)] public int radialSegments = 8;
+        [Range(2, 5)] public int heightSegments = 2;
 		[Range(0.0f, 0.35f)] public float bendDegree = 0.1f;
+        [HeaderAttribute("LSystem Parameter")]
+        [Range(1, 6)] public int N = 1;
+        [SerializeField] protected bool updateByN = false; // Editor 用 bool 値
 
-        public LSystem lsystem { get { return ls; } }
-        LSystem ls;
+        public LSystem lsystem { 
+            get { return ls; }
+            set { ls = value; }
+        }
+        LSystem ls = null;
 
 		// UnityEngine.Randomではなく、このRandクラスから生成された乱数を用いることで、
 		// 同じTreeDataのパラメータであれば同じ形の木が生成できるようにしており、
@@ -165,8 +244,16 @@ namespace Evolution {
 		Rand rnd;
 
 		public void Setup() {
-            ls = new LSystem(2);
-            ls.PrintString();
+            ls = LSystem.Instance;
+            if (ls == null) {
+                Debug.LogWarning("ls is null in data tree setup method");
+            }
+            if (updateByN) {
+                int diff = N - ls.N;
+                if (diff > 0) {
+                    ls.UpdateRuleByNumber(diff);
+                }
+            }
 			rnd = new Rand(randomSeed);
 		}
 
@@ -202,6 +289,12 @@ namespace Evolution {
 		public float Length { get { return length; } } 
 		public float Offset { get { return offset; } }
 
+        public float ToRadius { get { return toRadius; } }
+        public float FromRadius { get { return fromRadius; } }
+        public float BinormalRoation { get { return binormalRotaion; } }
+
+        public TreeSegment SegmentForChild { get { return segmentForChild; } }
+
 		// 自身の世代（0が枝先）
 		int generation;
 
@@ -222,12 +315,31 @@ namespace Evolution {
 
 		// 根元から自身の根元に至るまでの長さ
 		float offset;
+        float binormalRotaion;
+
+        TreeSegment segmentForChild;
 
 		// 根元のコンストラクタ
-		public TreeBranch(int generations, float length, float radius, TreeData data) : this(generations, generations, Vector3.zero, Vector3.up, Vector3.right, Vector3.back, length, radius, 0f, data) {
+		public TreeBranch(
+            int generations, 
+            float length, 
+            float radius, 
+            TreeData data) : this(generations, generations, Vector3.zero, Vector3.up, Vector3.right, Vector3.back, length, radius, 0f, 0f, data) {
 		}
 
-		protected TreeBranch(int generation, int generations, Vector3 from, Vector3 tangent, Vector3 normal, Vector3 binormal, float length, float radius, float offset, TreeData data) {
+		public TreeBranch(
+            int generation, 
+            int generations, 
+            Vector3 from, 
+            Vector3 tangent, 
+            Vector3 normal, 
+            Vector3 binormal, 
+            float length, 
+            float radius, 
+            float offset, 
+            float rotation_b, // binormal の回転量 ::TEST
+            TreeData data
+            ) {
 			this.generation = generation;
 
 			this.fromRadius = radius;
@@ -243,8 +355,9 @@ namespace Evolution {
 			// normal方向の回転
 			var qn = Quaternion.AngleAxis(scale * data.GetRandomGrowthAngle(), normal);
 
+            this.binormalRotaion = rotation_b;
 			// binormal方向の回転
-			var qb = Quaternion.AngleAxis(scale * data.GetRandomGrowthAngle(), binormal);
+			var qb = Quaternion.AngleAxis(scale * binormalRotaion, binormal);
 
 			// 枝先が向いているtangent方向にqn * qbの回転をかけつつ、枝先の位置を決める
 			this.to = from + (qn * qb) * tangent * length;
@@ -254,48 +367,12 @@ namespace Evolution {
 
 			// モデル生成に必要な節を構築
 			segments = BuildSegments(data, fromRadius, toRadius, normal, binormal);
+            
+            segmentForChild = segments[segments.Count - 1];
+            // 子を生成するときはこの フレネフレームを使う 先端から伸ばす
 
 			children = new List<TreeBranch>();
-			if(generation > 0) {
-				// 分岐する数を取得
-				int count = data.GetRandomBranches();
-				for(int i = 0; i < count; i++) {
-                    // ↓ branch のセグメントを生成する処理. 描画の下になる部分．
-                    float ratio; // [0.0 ~ 1.0]
-                    if(count == 1)
-                    {
-						// 分岐数が1である場合（0除算を回避）
-                        ratio = 1f;
-                    } else
-                    {
-                        ratio = Mathf.Lerp(0.5f, 1f, (1f * i) / (count - 1));
-                    }
 
-					// 分岐元の節を取得
-                    var index = Mathf.FloorToInt(ratio * (segments.Count - 1));
-					var segment = segments[index];
-
-					// 分岐元の節が持つベクトルをTreeBranchに渡すことで滑らかな分岐を得る
-					Vector3 nt = segment.Frame.Tangent;
-					Vector3 nn = segment.Frame.Normal;
-                	Vector3 nb = segment.Frame.Binormal;
-
-					var child = new TreeBranch(
-						this.generation - 1, 
-                        generations,
-						segment.Position, 
-						nt, 
-						nn, 
-						nb, 
-						length * Mathf.Lerp(1f, data.lengthAttenuation, ratio), 
-						radius * Mathf.Lerp(1f, data.radiusAttenuation, ratio),
-						offset + length,
-						data
-					);
-
-					children.Add(child);
-				}
-			}
 		}
 
         /// フレネフレームを生成する．枝一つは 4つに分割されている
@@ -309,7 +386,7 @@ namespace Evolution {
 			var length = (to - from).magnitude;
 			var bend = length * (normal * data.GetRandomBendDegree() + binormal * data.GetRandomBendDegree());
 			curve.Points.Add(from);
-			curve.Points.Add(Vector3.Lerp(from, to, 0.25f) + bend);
+			curve.Points.Add(Vector3.Lerp(from, to, 0.25f) + bend); // ここで + bend をすると 枝が曲がる
 			curve.Points.Add(Vector3.Lerp(from, to, 0.75f) + bend);
 			curve.Points.Add(to);
 
@@ -319,6 +396,7 @@ namespace Evolution {
                 var radius = Mathf.Lerp(fromRadius, toRadius, u);
 
 				var position = curve.GetPointAt(u);
+                //Debug.Log(position);
 				var segment = new TreeSegment(frames[i], position, radius);
 				segments.Add(segment);
 			}
