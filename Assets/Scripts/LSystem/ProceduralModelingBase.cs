@@ -9,6 +9,8 @@ namespace Evolution
         Standard,
         UV,
         Normal,
+        Bark,
+        Grass,
     };
 
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
@@ -88,6 +90,10 @@ namespace Evolution
                     return Resources.Load<Material>("Materials/Normal");
                 case ProceduralModelingMaterial.UV:
                     return Resources.Load<Material>("Materials/UV");
+                case ProceduralModelingMaterial.Bark:
+                    return Resources.Load<Material>("Materials/Bark");
+                case ProceduralModelingMaterial.Grass:
+                    return Resources.Load<Material>("Materials/Grass");
             }
             return Resources.Load<Material>("Materials/Standard");
         }

@@ -90,19 +90,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbacba09f9354495cb8c4a0f3588156e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  materialType: 2
+  materialType: 1
   data:
     randomSeed: 2
     lengthAttenuation: 0.9
-    radiusAttenuation: 0.8
+    radiusAttenuation: 0.9
     branchesMin: 1
     branchesMax: 3
-    growthAngleMin: -15
-    growthAngleMax: 15
+    growthAngleMin: -5
+    growthAngleMax: 5
     growthAngleScale: 4
     radialSegments: 3
     heightSegments: 2
     bendDegree: 0.1
     N: 4
+    updateByN: 0
   length: 3
   radius: 1

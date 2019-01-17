@@ -69,6 +69,7 @@ namespace Evolution {
                         parent.ToRadius,
                         parent.Offset + parent.Length,
                         rotation_b,
+						true,
                         data
                     );
                     if (newBranch.FromRadius <= 0.01f) {
@@ -254,6 +255,7 @@ namespace Evolution {
                     ls.UpdateRuleByNumber(diff);
                 }
             }
+
 			rnd = new Rand(randomSeed);
 		}
 
@@ -324,7 +326,7 @@ namespace Evolution {
             int generations, 
             float length, 
             float radius, 
-            TreeData data) : this(generations, generations, Vector3.zero, Vector3.up, Vector3.right, Vector3.back, length, radius, 0f, 0f, data) {
+            TreeData data) : this(generations, generations, Vector3.zero, Vector3.up, Vector3.right, Vector3.back, length, radius, 0f, 0f, true, data) {
 		}
 
 		public TreeBranch(
@@ -338,6 +340,7 @@ namespace Evolution {
             float radius, 
             float offset, 
             float rotation_b, // binormal の回転量 ::TEST
+			bool haveChildren,
             TreeData data
             ) {
 			this.generation = generation;
@@ -373,6 +376,48 @@ namespace Evolution {
 
 			children = new List<TreeBranch>();
 
+			if(generation > 0 && fromRadius <= 0.5f && haveChildren) {
+				// 分岐する数を取得
+				int count = data.GetRandomBranches();
+				for(int i = 0; i < count; i++) {
+                    float ratio; // [0.0 ~ 1.0]
+                    if(count == 1)
+                    {
+						// 分岐数が1である場合（0除算を回避）
+                        ratio = 1f;
+                    } else
+                    {
+                        ratio = Mathf.Lerp(0.5f, 1f, (1f * i) / (count - 1));
+                    }
+
+					// 分岐元の節を取得
+                    var index = Mathf.FloorToInt(ratio * (segments.Count - 1));
+					var segment = segments[index];
+
+					// 分岐元の節が持つベクトルをTreeBranchに渡すことで滑らかな分岐を得る
+					Vector3 nt = segment.Frame.Tangent;
+					Vector3 nn = segment.Frame.Normal;
+                	Vector3 nb = segment.Frame.Binormal;
+
+					var child = new TreeBranch(
+						this.generation - 1, 
+                        generations,
+						segment.Position, 
+						nt, 
+						nn, 
+						nb, 
+						this.length * Mathf.Lerp(1f, data.lengthAttenuation, ratio), // -> length
+						radius / 2, // -> fromRadius
+						offset + length, // -> offset
+						rotation_b,
+						false,
+						data
+					);
+
+					children.Add(child);
+				}
+			}
+
 		}
 
         /// フレネフレームを生成する．枝一つは 4つに分割されている
@@ -400,6 +445,8 @@ namespace Evolution {
 				var segment = new TreeSegment(frames[i], position, radius);
 				segments.Add(segment);
 			}
+
+			
 			return segments;
 		}
 
