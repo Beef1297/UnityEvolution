@@ -370,7 +370,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1789126995
 Transform:
   m_ObjectHideFlags: 0
@@ -399,6 +399,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trees:
   - {fileID: 5320866891987348973, guid: 1e8e7eecf51204ee49e03d975996bbce, type: 3}
+  SpawnRange: 20
 --- !u!1 &1813852328
 GameObject:
   m_ObjectHideFlags: 0
@@ -454,6 +455,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: tree
       objectReference: {fileID: 0}
+    - target: {fileID: 5320866891987348973, guid: 1e8e7eecf51204ee49e03d975996bbce,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5320866891987348969, guid: 1e8e7eecf51204ee49e03d975996bbce,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -508,21 +514,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5320866891987348972, guid: 1e8e7eecf51204ee49e03d975996bbce,
-        type: 3}
-      propertyPath: data.radiusAttenuation
-      value: 0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 5320866891987348972, guid: 1e8e7eecf51204ee49e03d975996bbce,
-        type: 3}
-      propertyPath: data.growthAngleMin
-      value: -5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5320866891987348972, guid: 1e8e7eecf51204ee49e03d975996bbce,
-        type: 3}
-      propertyPath: data.growthAngleMax
-      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1e8e7eecf51204ee49e03d975996bbce, type: 3}

@@ -10,7 +10,7 @@ public class InstantiateTree : MonoBehaviour
     [SerializeField] private float SpawnRange = 20;
     private List<LSystemTree> lsystemTrees;
     private LSystem ls;
-    private int N = 5;
+    private int N = 4;
     private EvalInfo evalInfo;
     private bool[] updateRules;
 
