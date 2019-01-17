@@ -32,7 +32,6 @@ public class InstantiateTree : MonoBehaviour
     }
 
     IEnumerator SpawnTrees () {
-        float x = 0f;
         while(true) {
             try {
                 ls = LSystem.Instance;
@@ -45,7 +44,9 @@ public class InstantiateTree : MonoBehaviour
                     continue;
                 }
                 for (int i = 0; i < trees.Length; i++) {
-                    var to = Instantiate(trees[i], new Vector3(x, 0, 0), Quaternion.identity, transform);
+                    float x = Random.Range(-20f, 20f);
+                    float z = Random.Range(-20f, 20f);
+                    var to = Instantiate(trees[i], new Vector3(x, 0, z), Quaternion.identity, transform);
                     evalInfo = ls.EvaluationInfo;
                     if (evalInfo != null) {
                         updateRules[i] = true;
@@ -53,7 +54,6 @@ public class InstantiateTree : MonoBehaviour
                     }
                 }
 
-                x += 10f;
             } catch(System.NullReferenceException e) {
                 Debug.LogWarning("Error occured: (spawn trees)" + e);
             }
@@ -62,22 +62,31 @@ public class InstantiateTree : MonoBehaviour
     }
 
     void EvalutionTree() {
+        System.Random rnd = new System.Random();
+        const int STANDARD_SIZE = 80;
         mre.WaitOne();
 
         try {
             var size = Mathf.Sqrt(evalInfo.SpreadDegree * evalInfo.Height);
             Debug.Log("size: " + size);
-            if (size <= 80) {
-                var randomIndex = Mathf.RoundToInt(size) % ls.Rule.TableF.Count;
-                string rule = ls.Rule.TableF[randomIndex];
-                rule += "+F";
-                ls.Rule.TableF[0] = rule;
+            int tableFCount = ls.Rule.TableF.Count;
+            int elementsCount = ls.Rule.UsingRuleElements.Count;
+            if (size <= STANDARD_SIZE) { // 観測結果より
+                var randomIndex = rnd.Next(tableFCount - 1);
+                string rule = "F";
+                for (int i = 0; i < 4; i++) {
+                    rule += ls.Rule.UsingRuleElements[rnd.Next(elementsCount - 1)];
+                }
+                Debug.Log(rule);
+                ls.Rule.TableF[randomIndex] = rule;
             }
             if (evalInfo.BranchNum <= 500) {
-                var randomIndex = Mathf.RoundToInt(evalInfo.BranchNum) % ls.Rule.TableF.Count;
-                string rule = ls.Rule.TableF[randomIndex];
-                rule += "[-F]";
-                ls.Rule.TableF[0] = rule;
+                var randomIndex = rnd.Next(tableFCount - 1);
+                string rule = "F";
+                for (int i = 0; i < 4; i++) {
+                    rule += ls.Rule.UsingRuleElements[rnd.Next(elementsCount - 1)];
+                }
+                ls.Rule.TableF[randomIndex] = rule;
             }
             resetSyntax = true;
         } 

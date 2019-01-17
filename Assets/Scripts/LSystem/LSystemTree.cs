@@ -222,8 +222,8 @@ namespace Evolution {
 		public int randomSeed = 0;
 		[Range(0.5f, 0.99f)] public float lengthAttenuation = 0.9f, radiusAttenuation = 0.6f;
 		[Range(1, 3)] public int branchesMin = 1, branchesMax = 3;
-        [Range(-45f, 0f)] public float growthAngleMin = -15f;
-        [Range(0f, 45f)] public float growthAngleMax = 15f;
+        [Range(-45f, 0f)] public float growthAngleMin = -5f;
+        [Range(0f, 45f)] public float growthAngleMax = 5f;
         [Range(1f, 10f)] public float growthAngleScale = 4f;
 		[Range(3, 20)] public int radialSegments = 8;
         [Range(2, 5)] public int heightSegments = 2;

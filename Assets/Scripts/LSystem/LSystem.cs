@@ -137,6 +137,7 @@ namespace Evolution {
         }
         public List<string> TableX { get { return tableX; } }
         public char[] UsingChars { get { return usingChars; } }
+        public List<string> UsingRuleElements { get { return usingRuleElements; } }
         public float angle = 25.7f;
         // 生成規則は基本的に 1文字 (X or F) -> 文字列にする．面倒なので
         // だから，List で一括管理
@@ -154,7 +155,16 @@ namespace Evolution {
             '[',
             ']',
             '+',
-            '-'
+            '-',
+            'X'
+        };
+        List<string> usingRuleElements = new List<string>() {
+            "F",
+            "[+F]",
+            "[-F]",
+            "+",
+            "-",
+            "X"
         };
         public RepresentRule() {}
         
